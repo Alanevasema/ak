@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>نظام المحتوى التعليمي الآمن</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            text-align: center;
+            direction: rtl;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+            color: #fdbb2d;
+            font-size: 28px;
+        }
+        
+        .login-section, .content-section {
+            display: none;
+        }
+        
+        .active {
+            display: block;
+        }
+        
+        .input-group {
+            margin: 20px 0;
+        }
+        
+        input {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #fdbb2d;
+            color: #1a2a6c;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 10px 0;
+        }
+        
+        button:hover {
+            background: #ffa500;
+            transform: translateY(-2px);
+        }
+        
+        .lesson-btn {
+            background: #1a2a6c;
+            color: white;
+            text-align: right;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .lesson-btn:hover {
+            background: #243b7b;
+        }
+        
+        .video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .video-container iframe {
+            width: 100%;
+            height: calc(100% - 50px);
+            border: none;
+        }
+        
+        .close-btn {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: red;
+            color: white;
+            padding: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            z-index: 1001;
+            border: none;
+            border-radius: 0;
+        }
+        
+        .no-connection {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            font-size: 24px;
+        }
+        
+        .message {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .error {
+            background: rgba(178, 31, 31, 0.3);
+            border: 1px solid #b21f1f;
+        }
+        
+        .success {
+            background: rgba(0, 128, 0, 0.3);
+            border: 1px solid green;
+        }
+        
+        .protection-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3000;
+            pointer-events: none;
+        }
+        
+        .protection-message {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+        
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #fdbb2d;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="protection-overlay"></div>
+    
+    <div class="no-connection" id="noConnection">
+        <h2>انقطع الاتصال بالإنترنت</h2>
+        <p>يجب إعادة الاتصال بالإنترنت لمشاهدة المحتوى</p>
+        <p>الرابط الاحتياطي: www.5ukyw:1758483884471&udm=2&.com</p>
+    </div>
+
+    <div class="container">
+        <h1>نظام المحتوى التعليمي الآمن</h1>
+        
+        <div class="login-section active" id="loginSection">
+            <div class="input-group">
+                <input type="text" id="studentCode" placeholder="أدخل الكود الخاص بك">
+                <button onclick="validateCode()">دخول</button>
+            </div>
+            <div class="loader" id="loginLoader"></div>
+            <div class="message error" id="loginError">كود غير صحيح أو مستخدم على جهاز آخر</div>
+        </div>
+        
+        <div class="content-section" id="contentSection">
+            <h2 id="welcomeMessage">مرحباً، الطالب</h2>
+            <div id="lessonsList"></div>
+            <button onclick="logout()">تسجيل الخروج</button>
+        </div>
+    </div>
+
+    <div class="video-container" id="videoContainer">
+        <iframe id="videoFrame" allowfullscreen></iframe>
+        <button class="close-btn" onclick="closeVideo()">إغلاق الفيديو</button>
+    </div>
+
+    <script>
+        // بيانات افتراضية لمحاكاة Google Sheets
+        const studentsData = [
+            { 
+                code: "11", 
+                deviceId: "", 
+                name: "أحمد محمد", 
+                lessons: [
+                    { 
+                        title: "الدرس الأول: مقدمة في البرمجة", 
+                        url: "https://drive.google.com/file/d/1OOgrxovUJw5cGGLCfawcho8_rV-Xobk1/preview",
+                        backupUrl: "www.5ukyw:1758483884471&udm=2&.com"
+                    },
+                    { 
+                        title: "الدرس الثاني: هياكل البيانات", 
+                        url: "https://drive.google.com/file/d/1OOgrxovUJw5cGGLCfawcho8_rV-Xobk1/preview",
+                        backupUrl: "www.5ukyw:1758483884471&udm=2&.com"
+                    }
+                ]
+            },
+            { 
+                code: "22", 
+                deviceId: "", 
+                name: "فاطمة علي", 
+                lessons: [
+                    { 
+                        title: "الدرس الأول: أساسيات الرياضيات", 
+                        url: "https://drive.google.com/file/d/1OOgrxovUJw5cGGLCfawcho8_rV-Xobk1/preview",
+                        backupUrl: "www.5ukyw:1758483884471&udm=2&.com"
+                    },
+                    { 
+                        title: "الدرس الثاني: الجبر الخطي", 
+                        url: "https://drive.google.com/file/d/1OOgrxovUJw5cGGLCfawcho8_rV-Xobk1/preview",
+                        backupUrl: "www.5ukyw:1758483884471&udm=2&.com"
+                    }
+                ]
+            }
+        ];
+        
+        // توليد معرف فريد للجهاز
+        function generateDeviceId() {
+            let deviceId = localStorage.getItem('deviceId');
+            if (!deviceId) {
+                deviceId = 'device_' + Math.random().toString(36).substr(2, 9) + 
+                          '_' + new Date().getTime().toString(36);
+                localStorage.setItem('deviceId', deviceId);
+            }
+            return deviceId;
+        }
+        
+        // التحقق من صحة الكود
+        function validateCode() {
+            const code = document.getElementById('studentCode').value.trim();
+            const deviceId = generateDeviceId();
+            const errorDiv = document.getElementById('loginError');
+            const loader = document.getElementById('loginLoader');
+            
+            if (!code) {
+                errorDiv.textContent = "يرجى إدخال الكود";
+                errorDiv.style.display = "block";
+                return;
+            }
+            
+            errorDiv.style.display = "none";
+            loader.style.display = "block";
+            
+            // محاكاة للاتصال بـ Google Sheets مع تأخير
+            setTimeout(() => {
+                loader.style.display = "none";
+                
+                const student = studentsData.find(s => s.code === code);
+                
+                if (student) {
+                    if (student.deviceId && student.deviceId !== deviceId) {
+                        errorDiv.textContent = "هذا الكود مستخدم بالفعل على جهاز آخر";
+                        errorDiv.style.display = "block";
+                        return;
+                    }
+                    
+                    // تسجيل deviceId في Google Sheets (محاكاة)
+                    student.deviceId = deviceId;
+                    
+                    // تخزين بيانات الطالب محلياً
+                    localStorage.setItem('studentData', JSON.stringify({
+                        code: code,
+                        deviceId: deviceId,
+                        name: student.name
+                    }));
+                    
+                    // عرض محتوى الدروس
+                    showContent(student);
+                } else {
+                    errorDiv.textContent = "كود غير صحيح";
+                    errorDiv.style.display = "block";
+                }
+            }, 1500);
+        }
+        
+        // عرض محتوى الدروس
+        function showContent(student) {
+            document.getElementById('loginSection').classList.remove('active');
+            document.getElementById('contentSection').classList.add('active');
+            document.getElementById('welcomeMessage').textContent = `مرحباً، ${student.name}`;
+            
+            const lessonsList = document.getElementById('lessonsList');
+            lessonsList.innerHTML = '';
+            
+            student.lessons.forEach((lesson, index) => {
+                const button = document.createElement('button');
+                button.className = 'lesson-btn';
+                button.innerHTML = `${lesson.title} <span>▶</span>`;
+                button.onclick = () => playVideo(lesson.url, lesson.backupUrl);
+                lessonsList.appendChild(button);
+            });
+        }
+        
+        // تشغيل الفيديو
+        function playVideo(url, backupUrl) {
+            const videoContainer = document.getElementById('videoContainer');
+            const videoFrame = document.getElementById('videoFrame');
+            
+            // التحقق من الاتصال أولاً
+            if (!navigator.onLine) {
+                alert("لا يوجد اتصال بالإنترنت. لا يمكن تشغيل الفيديو.");
+                window.location.href = "http://" + backupUrl;
+                return;
+            }
+            
+            videoFrame.src = url;
+            videoContainer.style.display = 'block';
+            
+            // محاولة الدخول إلى وضع ملء الشاشة
+            if (videoFrame.requestFullscreen) {
+                videoFrame.requestFullscreen();
+            } else if (videoFrame.webkitRequestFullscreen) {
+                videoFrame.webkitRequestFullscreen();
+            } else if (videoFrame.msRequestFullscreen) {
+                videoFrame.msRequestFullscreen();
+            }
+        }
+        
+        // إغلاق الفيديو
+        function closeVideo() {
+            const videoContainer = document.getElementById('videoContainer');
+            const videoFrame = document.getElementById('videoFrame');
+            
+            videoFrame.src = '';
+            videoContainer.style.display = 'none';
+            
+            if (document.fullscreenElement) {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+        }
+        
+        // تسجيل الخروج
+        function logout() {
+            localStorage.removeItem('studentData');
+            document.getElementById('contentSection').classList.remove('active');
+            document.getElementById('loginSection').classList.add('active');
+            document.getElementById('studentCode').value = '';
+        }
+        
+        // التحقق من الاتصال بالإنترنت
+        function checkConnection() {
+            const noConnectionDiv = document.getElementById('noConnection');
+            
+            if (!navigator.onLine) {
+                noConnectionDiv.style.display = 'flex';
+                document.getElementById('videoContainer').style.display = 'none';
+            } else {
+                noConnectionDiv.style.display = 'none';
+            }
+        }
+        
+        // إجراءات الحماية الأمنية
+        function applySecurityMeasures() {
+            // منع نسخ النص
+            document.addEventListener('copy', (e) => {
+                e.preventDefault();
+                alert('غير مسموح بنسخ المحتوى');
+            });
+            
+            // منع القائمة اليمنى
+            document.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                alert('غير مسموح بهذا الإجراء');
+            });
+            
+            // منع لمس طويل
+            let touchTimer;
+            document.addEventListener('touchstart', (e) => {
+                touchTimer = setTimeout(() => {
+                    e.preventDefault();
+                    alert('غير مسموح باللمس الطويل');
+                }, 500);
+            });
+            
+            document.addEventListener('touchend', () => {
+                clearTimeout(touchTimer);
+            });
+            
+            // منع فتح الأدوات المطورة
+            document.addEventListener('keydown', (e) => {
+                // F12, Ctrl+Shift+I, Ctrl+Shift+C, Ctrl+U
+                if (e.key === 'F12' || 
+                    (e.ctrlKey && e.shiftKey && e.key === 'I') || 
+                    (e.ctrlKey && e.shiftKey && e.key === 'C') || 
+                    (e.ctrlKey && e.key === 'U')) {
+                    e.preventDefault();
+                    alert('غير مسموح بهذا الإجراء');
+                }
+            });
+            
+            // التحقق من أن الجهاز ليس محاكي
+            function checkForEmulator() {
+                // التحقق من وجود إضافات تشير إلى المحاكاة
+                if (navigator.plugins.length === 0 && navigator.userAgent.indexOf('Mobile') === -1) {
+                    alert('هذا التطبيق مخصص للهواتف فقط ولا يعمل على المحاكيات');
+                    window.location.href = 'about:blank';
+                }
+                
+                // التحقق من دقة الشاشة
+                if (window.screen.width > 768 || window.screen.height > 1024) {
+                    alert('هذا التطبيق مخصص للهواتف فقط');
+                    window.location.href = 'about:blank';
+                }
+            }
+            
+            checkForEmulator();
+        }
+        
+        // تهيئة الصفحة
+        function init() {
+            // التحقق من وجود اتصال
+            checkConnection();
+            window.addEventListener('online', checkConnection);
+            window.addEventListener('offline', checkConnection);
+            
+            // تطبيق إجراءات الحماية
+            applySecurityMeasures();
+            
+            // التحقق من تسجيل دخول سابق
+            const studentData = localStorage.getItem('studentData');
+            if (studentData) {
+                const student = JSON.parse(studentData);
+                const matchedStudent = studentsData.find(s => s.code === student.code && s.deviceId === student.deviceId);
+                
+                if (matchedStudent) {
+                    showContent(matchedStudent);
+                } else {
+                    localStorage.removeItem('studentData');
+                }
+            }
+        }
+        
+        // تشغيل التهيئة عند تحميل الصفحة
+        window.onload = init;
+    </script>
+</body>
+</html>
